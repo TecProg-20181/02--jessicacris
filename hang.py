@@ -5,6 +5,7 @@ import string
 
 WORDLIST_FILENAME = "palavras.txt"
 
+#Function that draws the gallows and doll according to the number of errors.
 class Hangman():
     def hangman_man(self, guesses):
 
@@ -25,7 +26,7 @@ class Hangman():
         elif guesses == 6:
             print "________      "
             print "|      |      "
-            print "|      ~      "
+            print "|           "
             print "|             "
             print "|             "
             print "|             "
@@ -73,14 +74,14 @@ class Hangman():
             print "|             "
 
 
-def load_Words():
+def loadWords():
     """
     Depending on the size of the word list, this function may
     take a while to finish.
     """
     print "Loading word list from file..."
     # inFile: file
-    inFile = open(WORDLIST_FILENAME, 'r', 0)
+    inFile = open(WORDLIST_FILENAME, 'read', 0)
     # line: string
     line = inFile.readline()
     # wordlist: list of strings
@@ -89,104 +90,125 @@ def load_Words():
     return random.choice(wordlist)
 
 
-def is_Word_Guessed(secret_Word, letters_Guessed):
+def isWordGuessed(secretWord, letters_guessed):
     secret_Letters = []
 
-#    for letter in secretWord:
-#        if letter in secretLetters:
-#            secretLetters.append(letter)
-#        else:
-#            pass
-
-    for letter in secret_Word:
-        if letter in letters_Guessed:
+    for letter in secretWord:
+        if letter in letters_guessed:
             pass
         else:
             return False
 
     return True
 
-def get_Guessed_Word():
-
-     guessed = ''
-
-
-     return guessed
-
-def get_Available_Letters():
+def get_available_letters():
     import string
     # 'abcdefghijklmnopqrstuvwxyz'
     available = string.ascii_lowercase
 
-
     return available
 
-def hangman(secret_Word):
+def count_letters(secretWord):
 
+    letters = []
+
+    for letter in secretWord:
+        if letter not in letters:
+            letters.append(letter)
+
+    return len(letters)
+
+def validated_word (secretWord, guesses):
+    MAXIMUM_TRIES = 20
+    tries = 0
+    validated_word = False
+
+    while not validated_word:
+        unique_letters = count_letters(secretWord)
+        print 'There are', unique_letters, 'unique Letters in this word'
+
+        if guesses < unique_letters:
+            print 'The secret Word have too many unique letters, reloading the letters'
+            secretWord = loadWords()
+            tries += 1
+            if tries >= MAXIMUM_TRIES:
+                print'Maximum of tries, exiting program'
+                return None
+        else:
+            validated_word = True
+    return secretWord
+
+def guessed_letters(secretWord, letters_guessed):
+    guessed = ''
+    for letter in secretWord:
+        if letter in letters_guessed:
+            guessed += letter
+        else:
+            guessed += '_ '
+
+    return guessed
+
+def show_available_letters(letters_guessed):
+    available = get_available_letters()
+    for letter in available:
+        if letter in letters_guessed:
+            available = available.replace(letter, '')
+    print 'Available letters', available
+
+def hangman(secretWord):
     guesses = 8
-    letters_Guessed = []
-    
+    secretWord = validated_word(secretWord, guesses)
+
+    if secretWord == None:
+        return
+
+    letters_guessed = []
+
     hangman = Hangman()
 
     print 'Welcome to the game, Hangam!'
-    print 'I am thinking of a word that is', len(secret_Word), ' letters long.'
+    print 'I am thinking of a word that is', len(secretWord), ' letters long.'
     print '-------------'
 
-    while  is_Word_Guessed(secret_Word, letters_Guessed) == False and guesses > 0:
+    while  isWordGuessed(secretWord, letters_guessed) == False and guesses >= 0:
         print 'You have ', guesses, 'guesses left.'
 
         hangman.hangman_man(guesses)
 
-        available = get_Available_Letters()
-        for letter in available:
-            if letter in letters_Guessed:
-                available = available.replace(letter, '')
+        if guesses == 0:
+            return
 
-        print 'Available letters', available
+        show_available_letters(letters_guessed)
+
         letter = raw_input('Please guess a letter: ')
-        if letter in letters_Guessed:
-
-            guessed = get_Guessed_Word()
-            for letter in secret_Word:
-                if letter in letters_Guessed:
-                    guessed += letter
-                else:
-                    guessed += '_ '
+        if letter in letters_guessed:
+            guessed = ''
+            guessed = guessed_letters(secretWord, letters_guessed)
 
             print 'Oops! You have already guessed that letter: ', guessed
-        elif letter in secret_Word:
-            letters_Guessed.append(letter)
+        elif letter in secretWord:
+            letters_guessed.append(letter)
 
-            guessed = get_Guessed_Word()
-            for letter in secret_Word:
-                if letter in letters_Guessed:
-                    guessed += letter
-                else:
-                    guessed += '_ '
+            guessed = ''
+            guessed = guessed_letters(secretWord, letters_guessed)
 
             print 'Good Guess: ', guessed
         else:
             guesses -=1
-            letters_Guessed.append(letter)
+            letters_guessed.append(letter)
 
-            guessed = get_Guessed_Word()
-            for letter in secret_Word:
-                if letter in letters_Guessed:
-                    guessed += letter
-                else:
-                    guessed += '_ '
+            guessed = ''
+            guessed = guessed_letters(secretWord, letters_guessed)
 
             print 'Oops! That letter is not in my word: ',  guessed
         print '------------'
 
     else:
-        if is_Word_Guessed(secret_Word, letters_Guessed) == True:
+        if isWordGuessed(secretWord, letters_guessed) == True:
             print 'Congratulations, you won!'
         else:
-            print 'Sorry, you ran out of guesses. The word was ', secret_Word, '.'
+            print 'Sorry, you ran out of guesses. The word was ', secretWord, '.'
 
 
-
-
-secret_Word = load_Words().lower()
-hangman(secret_Word)
+secretWord = loadWords().lower()
+hangman(secretWord)
