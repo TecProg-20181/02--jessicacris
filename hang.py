@@ -26,7 +26,7 @@ class Hangman():
         elif guesses == 6:
             print "________      "
             print "|      |      "
-            print "|           "
+            print "|      ~      "
             print "|             "
             print "|             "
             print "|             "
