@@ -108,6 +108,7 @@ def get_available_letters():
 
     return available
 
+# This function counts how many letters the word has and warn you how many different letters there are in the word.
 def count_letters(secretWord):
 
     letters = []
@@ -118,6 +119,7 @@ def count_letters(secretWord):
 
     return len(letters)
 
+# This function validates if the word has different letters have the same size as the attempts.
 def validated_word (secretWord, guesses):
     MAXIMUM_TRIES = 20
     tries = 0
